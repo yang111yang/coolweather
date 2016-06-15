@@ -1,11 +1,10 @@
 package com.coolweather.app.activity;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import com.coolweather.app.model.City;
-import com.coolweather.app.model.CoolWeatherDB;
+import com.coolweather.app.db.CoolWeatherDB;
 import com.coolweather.app.model.County;
 import com.coolweather.app.model.Province;
 import com.coolweather.app.util.HttpCallbackListener;
@@ -14,9 +13,11 @@ import com.coolweather.app.util.Utility;
 import com.coolweather.app.R;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
@@ -79,6 +80,15 @@ public class ChooseAreaActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		if (prefs.getBoolean("city_selected", false)) {
+			Intent intent = new Intent(this, WeatherActivity.class);
+			startActivity(intent);
+			finish();
+			return;
+		}
+		
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.choose_area);
 		listView = (ListView) findViewById(R.id.list_view);
@@ -97,11 +107,19 @@ public class ChooseAreaActivity extends Activity {
 				} else if (currentLevel == LEVEL_CITY) {
 					selectedCity = cityList.get(index);
 					queryCounties();
+				} else if (currentLevel == LEVEL_COUNTY) {
+//					Log.d("TEST", "ggggggggggggggggg");
+					String countyCode = countyList.get(index).getCountyCode();
+					//跳转到天气界面
+					Intent intent = new Intent(ChooseAreaActivity.this, WeatherActivity.class);
+					intent.putExtra("county_code", countyCode);
+					startActivity(intent);
+					finish();
 				}
 				
 			}
 		});
-		queryProvinces();
+		queryProvinces(); //加载省级数据
 	}
 	
 	/**
@@ -109,7 +127,6 @@ public class ChooseAreaActivity extends Activity {
 	 */
 	private void queryProvinces(){
 		provinceList = coolWeatherDB.loadProvinces();
-		Log.d("TEST", "............");
 		if (provinceList.size() > 0) {
 			dataList.clear();
 			for(Province province : provinceList){
@@ -156,6 +173,7 @@ public class ChooseAreaActivity extends Activity {
 			adapter.notifyDataSetChanged();
 			listView.setSelection(0);
 			titleText.setText(selectedCity.getCityName());
+			currentLevel = LEVEL_COUNTY;
 		} else {
 			queryFromServer(selectedCity.getCityCode(), "county");
 		}
@@ -199,7 +217,6 @@ public class ChooseAreaActivity extends Activity {
 						};
 					});
 				}
-				
 			}
 			
 			@Override

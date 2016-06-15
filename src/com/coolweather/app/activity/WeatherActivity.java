@@ -66,8 +66,8 @@ public class WeatherActivity extends Activity implements OnClickListener {
 		temp1Text = (TextView) findViewById(R.id.temp1);
 		temp2Text = (TextView) findViewById(R.id.temp2);
 		currentDateText = (TextView) findViewById(R.id.current_date);
-		/*switchCity = (Button) findViewById(R.id.switch_city);
-		refreshWeather = (Button) findViewById(R.id.refresh_weather);*/
+		switchCity = (Button) findViewById(R.id.switch_city);
+		refreshWeather = (Button) findViewById(R.id.refresh_weather);
 		String countyCode = getIntent().getStringExtra("county_code");
 		//判断是否有县级的代号
 		if (!TextUtils.isEmpty(countyCode)) {
@@ -79,8 +79,8 @@ public class WeatherActivity extends Activity implements OnClickListener {
 			//没有县级代号，显示本地天气
 			showWeather();
 		}
-//		switchCity.setOnClickListener(this);
-//		refreshWeather.setOnClickListener(this);
+		switchCity.setOnClickListener(this);
+		refreshWeather.setOnClickListener(this);
 	}
 	
 	@Override
@@ -99,7 +99,7 @@ public class WeatherActivity extends Activity implements OnClickListener {
 			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 			String weatherCode = prefs.getString("weather_code", "");
 			//如果天气代号不为空的情况下，查询天气
-			if (TextUtils.isEmpty(weatherCode)) {
+			if (!TextUtils.isEmpty(weatherCode)) {
 				queryWeatherInfo(weatherCode);
 			}
 			break;
